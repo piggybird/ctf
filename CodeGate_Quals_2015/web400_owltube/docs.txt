@@ -1,0 +1,27 @@
+Ban dau:
+{"u": "xxxx3", "pw": "aaaaaaaaaabbbbbbbbbbbbbbbbccccccccccccc"}
+Thay doi:
+{"u": "xxxx3", " -> {"u": "admin"} "
+ccccccccccccc"}\x01 -> ccccccccccccccc1
+=>
+{"u": "admin"} "pw": "aaaaaaaaaa????????????????cccccccccccccc1  (1=49)
+
+iv b1 b2 b3 b4 pad
+iv c1 c2 c3 c4 cpad
+control b1, b4
+b1 = d(c1) ^ iv  
+b4 = d(c4) ^ c3
+
+niv = nb1 ^ b1 ^ iv
+nc3 = nb4 ^ b4 ^ c3
+
+
+g.db.users.find_one(get_cookie())
+g.db.videos.find({"user": g.user["u"]})
+
+vid = {}
+vid["title"] = request.form.get("title")
+vid["vid"] = request.form.get("vid")
+vid["user"] = g.user["u"]
+
+g.db.videos.insert(vid)

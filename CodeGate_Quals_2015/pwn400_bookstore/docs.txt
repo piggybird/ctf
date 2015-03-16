@@ -1,0 +1,35 @@
+0xffffb674
+
+(20 book buffer)
+
+0xffffd244
+
+0xffffd260  buf
+
+0xffffd3a8 max-overflow
+
+0xffffd3dc choice
+0xffffd3e0  j
+0xffffd3ec  *books
+0xffffd408  ebp
+stackcookie
+savedframe
+rete
+
+00000000 book            struc ; (sizeof=0x164)
+00000000 no              dd ?
+00000004 type            dd ?
+00000008 name            db 20 dup(?)
+0000001C price           dd ?
+00000020 stock           dd ?
+00000024 unknown         db 20 dup(?)
+00000038 description     db 300 dup(?)
+00000164 book            ends
+00000164
+
+ebp 0xffffd358
+addr books: 0xffffb5c4
+addr object tmp: 0xffffd1b0
+addr object 20: 0xffffd194
+
+0x41414141 1094795585
